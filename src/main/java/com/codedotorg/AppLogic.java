@@ -1,5 +1,14 @@
 package com.codedotorg;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.tensorflow.Graph;
+import org.tensorflow.Session;
+import org.tensorflow.Tensor;
+
+
 public class AppLogic {
 
     /** The pin to unlock the app */
@@ -23,8 +32,29 @@ public class AppLogic {
      * @return the user PIN as a string
      */
     public String createUserPin(String predictedClass) {
-        
-        return "";
+        byte[] graphDef;
+        try {
+            graphDef = Files.readAllBytes(Paths.get("src/main/resources/model.pb"));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+        try (Graph graph = new Graph()) {
+            graph.importGraphDef(graphDef);
+            try (Session session = new Session(graph)) {
+                Tensor<String> inputTensor = Tensor.create(predictedClass.getBytes("UTF-8"), String.class);
+                Tensor<?> outputTensor = session.runner()
+                                                .feed("input_node", inputTensor)
+                                                .fetch("output_node")
+                                                .run()
+                                                .get(0);
+                String userPin = new String(outputTensor.bytesValue(), "UTF-8");
+                return userPin;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 
     /**
@@ -32,8 +62,7 @@ public class AppLogic {
      * @return true if the length of the user's PIN is equal to 4, false otherwise.
      */
     public boolean checkPinLength() {
-        
-        return false;
+        return user.length() == 4;
     }
 
     /**
