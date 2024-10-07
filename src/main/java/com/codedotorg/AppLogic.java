@@ -61,7 +61,7 @@ public class AppLogic {
      */
     private String createRandomPin() {
         
-        return "";
+        return "1234";
     }
 
 }
