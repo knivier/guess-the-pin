@@ -34,7 +34,7 @@ public class AppLogic {
     public String createUserPin(String predictedClass) {
         byte[] graphDef;
         try {
-            graphDef = Files.readAllBytes(Paths.get("src/main/resources/model.pb"));
+            graphDef = Files.readAllBytes(Paths.get("src\\main\\java\\com\\codedotorg\\model\\saved_model.pb"));
         } catch (IOException e) {
             e.printStackTrace();
             return "";
