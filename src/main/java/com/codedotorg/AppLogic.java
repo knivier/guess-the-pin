@@ -1,14 +1,5 @@
 package com.codedotorg;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import org.tensorflow.Graph;
-import org.tensorflow.Session;
-import org.tensorflow.Tensor;
-
-
 public class AppLogic {
 
     /** The pin to unlock the app */
@@ -26,45 +17,24 @@ public class AppLogic {
         user = "";
     }
 
-      /**
+    /**
      * Creates a user PIN based on the predicted class.
      * @param predictedClass the predicted class from the machine learning model
      * @return the user PIN as a string
      */
     public String createUserPin(String predictedClass) {
-        byte[] graphDef;
-        try {
-            graphDef = Files.readAllBytes(Paths.get("src\\main\\java\\com\\codedotorg\\model\\saved_model.pb"));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+        StringBuilder userPin = new StringBuilder();
+        for (char ch : predictedClass.toCharArray()) {
+            userPin.append((int) ch % 10);
         }
-        try (Graph graph = new Graph()) {
-            graph.importGraphDef(graphDef);
-            try (Session session = new Session(graph)) {
-                Tensor<String> inputTensor = Tensor.create(predictedClass.getBytes("UTF-8"), String.class);
-                Tensor<?> outputTensor = session.runner()
-                                                .feed("input_node", inputTensor)
-                                                .fetch("output_node")
-                                                .run()
-                                                .get(0);
-                String userPin = new String(outputTensor.bytesValue(), "UTF-8");
-                return userPin;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return "";
-        }
+        return userPin.toString();
     }
-
-
     /**
      * Checks if the length of the user's PIN is equal to 4.
      * @return true if the length of the user's PIN is equal to 4, false otherwise.
      */
     public boolean checkPinLength() {
-        
-        return false;
+        return user.length() == 4;
     }
 
     /**
@@ -73,11 +43,11 @@ public class AppLogic {
      * @return a string indicating whether the PIN is correct or not
      */
     public String getPinStatus(String userPin) {
-        if (userPin.equals("1234"))
-            return "correct";
-          
-        else
-            return "incorrect";
+        if (userPin.equals(pin)) {
+            return "PIN is correct";
+        } else {
+            return "PIN is incorrect";
+        }
     }
     
     /**
@@ -94,9 +64,7 @@ public class AppLogic {
      * @return the generated PIN number as a string.
      */
     private String createRandomPin() {
-        
-        return "1234";
+        int randomPin = (int)(Math.random() * 9000) + 1000; // Generates a random 4-digit number
+        return String.valueOf(randomPin);
     }
-    //private String getRealPin() 
-
 }
